@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <title>AI 튜터 조종석</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
 </head>
 <body>
     <header>
@@ -12,7 +25,6 @@
     </header>
 
     <main class="container">
-        <!-- ==================== 교사 제어판 ==================== -->
         <section class="control-panel teacher-panel">
             <h2>👨‍🏫 교사 제어판</h2>
 
@@ -24,7 +36,7 @@
                     <button id="delete-api-key-btn" class="danger">삭제</button>
                 </div>
             </fieldset>
-            
+
             <fieldset>
                 <legend>AI 지도 방향 (프롬프트)</legend>
                 <textarea id="teacher-prompt" rows="4" placeholder="예: 정답을 직접 알려주지 말고, 학생이 스스로 생각할 수 있도록 힌트만 주세요. 친절한 말투로 격려해주세요."></textarea>
@@ -48,18 +60,17 @@
                 <input type="file" id="teacher-example-uploader" accept="image/*,application/pdf">
                 <span id="example-file-name">선택된 파일 없음</span>
                 <div class="button-group">
-                     <button id="delete-example-btn" class="danger">삭제</button>
+                    <button id="delete-example-btn" class="danger">삭제</button>
                 </div>
             </fieldset>
         </section>
 
-        <!-- ==================== 학생 작업 공간 ==================== -->
         <section class="control-panel student-panel">
             <h2>👩‍🎓 학생 작업 공간</h2>
             <p>도움이 필요한 문제 사진이나 PDF를 올려주세요!</p>
             <input type="file" id="student-problem-uploader" accept="image/*,application/pdf">
             <button id="start-solving-btn">도움 요청하기!</button>
-            
+
             <div id="loading-spinner" class="hidden">
                 <div class="spinner"></div>
                 <p>AI 튜터가 문제를 분석하고 있어요...</p>
@@ -67,9 +78,7 @@
 
             <div id="conversation-area" class="hidden">
                 <h3>AI 튜터와의 대화</h3>
-                <div id="chat-history">
-                    <!-- 대화 내용이 여기에 표시됩니다 -->
-                </div>
+                <div id="chat-history"></div>
                 <div id="student-input-area">
                     <input type="text" id="student-question-input" placeholder="궁금한 점을 물어보거나 답변을 입력하세요">
                     <button id="send-student-msg-btn">전송</button>

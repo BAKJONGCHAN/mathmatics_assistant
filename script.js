@@ -2,7 +2,6 @@
 window.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM 요소 가져오기 ---
-    // 교사 제어판
     const apiKeyInput = document.getElementById('api-key-input');
     const saveApiKeyBtn = document.getElementById('save-api-key-btn');
     const deleteApiKeyBtn = document.getElementById('delete-api-key-btn');
@@ -16,7 +15,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const exampleFileName = document.getElementById('example-file-name');
     const deleteExampleBtn = document.getElementById('delete-example-btn');
 
-    // 학생 작업 공간
     const studentProblemUploader = document.getElementById('student-problem-uploader');
     const startSolvingBtn = document.getElementById('start-solving-btn');
     const loadingSpinner = document.getElementById('loading-spinner');
@@ -38,12 +36,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- 설정 불러오기 (localStorage 사용) ---
     function loadSettings() {
-        // API 키 로드
         API_KEY = localStorage.getItem('gemini-api-key') || '';
         apiKeyInput.value = API_KEY;
-        // 교사 프롬프트 로드
         teacherPrompt.value = localStorage.getItem('teacher-prompt') || '';
-        // 온도 로드
         const savedTemp = localStorage.getItem('temperature') || '0.3';
         temperatureSlider.value = savedTemp;
         temperatureValue.textContent = savedTemp;
@@ -51,7 +46,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- 이벤트 리스너 설정 ---
     function setupEventListeners() {
-        // 교사 컨트롤
         saveApiKeyBtn.addEventListener('click', () => {
             localStorage.setItem('gemini-api-key', apiKeyInput.value);
             API_KEY = apiKeyInput.value;
@@ -89,7 +83,6 @@ window.addEventListener('DOMContentLoaded', () => {
             exampleFileName.textContent = '선택된 파일 없음';
         });
 
-        // 학생 컨트롤
         startSolvingBtn.addEventListener('click', startTutoringSession);
         sendStudentMsgBtn.addEventListener('click', sendStudentMessage);
         studentQuestionInput.addEventListener('keyup', (event) => {
@@ -112,42 +105,44 @@ window.addEventListener('DOMContentLoaded', () => {
         }
 
         setLoadingState(true);
-        conversationHistory = []; // 새 세션 시작, 대화 기록 초기화
+        conversationHistory = [];
         chatHistory.innerHTML = '';
 
         try {
-            // 1. OCR로 문제 텍스트 추출 (Gemini 1.5 Pro)
             const problemText = await ocrChef(studentFile);
             displayMessage(`(AI가 읽은 문제: ${problemText})`, 'system');
 
-            // 2. 튜터링 시작 프롬프트 구성
-            let initialPrompt = `당신은 초등학생을 위한 소크라테스식 AI 수학 튜터입니다. 당신의 목표는 학생이 스스로 답을 찾도록 안내하는 것입니다. 절대로 최종 정답을 직접 알려주지 마세요. 대신, 한 번에 하나의 힌트나 다음 단계를 생각하게 하는 질문을 던지세요.
+            const initialPrompt = `당신은 고등학생을 위한 AI 수학 튜터입니다. 당신의 목표는 학생이 답을 찾도록 안내하는 것입니다.
 
-학생이 풀 문제는 다음과 같습니다: "${problemText}"
+            [매우 중요한 규칙]
+            1. 모든 답변은 반드시 한국어로 해야 합니다.
+            2. 답변은 문장 단위로 줄을 바꾸어(개행하여) 명확하게 제시해주세요. 학생들이 한 번에 한 문장씩 집중해서 읽을 수 있도록 도와줍니다.
+            3. 필요한 경우 정답을 알려주세요. 그리고 힌트나 다음 단계를 생각하게 하는 질문을 던지세요.
+           
+            학생이 풀 문제는 다음과 같습니다: "${problemText}"
 
-[교사 요청사항]: ${localStorage.getItem('teacher-prompt') || '특별한 요청 없음. 친절하게 안내해주세요.'}
+            [교사 요청사항]: ${localStorage.getItem('teacher-prompt') || '특별한 요청 없음. 친절하게 안내해주세요.'}
 
-이제 학생에게 첫 번째 힌트나 질문을 던지며 튜터링을 시작해주세요.`;
+            이제 위의 모든 규칙을 철저히 지키면서 튜터링을 시작해주세요.`;
 
-            // 3. AI에게 첫 안내 요청
             const firstHint = await guidanceChef(initialPrompt, []);
             displayMessage(firstHint, 'ai');
 
             conversationArea.classList.remove('hidden');
 
         } catch (error) {
-            console.error("튜터링 시작 오류:", error); 
+            console.error("튜터링 시작 오류:", error);
             const friendlyErrorMessage = `오류가 발생했습니다! AI 튜터를 부를 수 없어요. 😢
-            
+
 [에러 내용]: ${error.message}
 
 아래 사항을 확인해주세요:
 1. 교사 제어판의 API 키가 정확한가요? (앞뒤 공백 주의!)
 2. 인터넷 연결이 안정적인가요?
 3. (드물게) API 키에 대한 권한 설정 문제일 수 있습니다.`;
-            
+
             displayMessage(friendlyErrorMessage, 'system');
-            conversationArea.classList.remove('hidden'); 
+            conversationArea.classList.remove('hidden');
         } finally {
             setLoadingState(false);
         }
@@ -162,7 +157,6 @@ window.addEventListener('DOMContentLoaded', () => {
         setInteractingState(true);
 
         try {
-            // AI에게 후속 질문/답변 요청
             const aiResponse = await guidanceChef(messageText, conversationHistory);
             displayMessage(aiResponse, 'ai');
         } catch (error) {
@@ -185,25 +179,41 @@ window.addEventListener('DOMContentLoaded', () => {
         sendStudentMsgBtn.disabled = isInteracting;
     }
 
+    // --- 메시지 표시 함수 (MathJax 적용) ---
     function displayMessage(text, sender) {
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('chat-message', `${sender}-message`);
-        messageDiv.textContent = text; 
+
+        // LaTeX 코드를 찾아서 <span class="latex"> 태그로 감싸기
+        messageDiv.innerHTML = text.replace(/\$(.+?)\$/g, '<span class="latex">$$$1$$</span>');
+
         chatHistory.appendChild(messageDiv);
+
+        // MathJax 렌더링 (비동기로 처리)
+        MathJax.typesetPromise([messageDiv]).catch(err => console.error("MathJax 렌더링 오류:", err));
+
         chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 
     // --- API 호출 함수 (셰프들) ---
     async function ocrChef(file) {
-        // OCR 역할: 이미지/PDF 분석에 최적화된 Gemini 1.5 Pro 사용
-        const model = 'gemini-1.5-pro-latest';
+        const model = 'gemini-2.5-flash-preview-04-17';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
-        
+
+        const ocrPrompt = `당신은 수학 문제 전문 OCR 분석가입니다. 당신의 임무는 그림과 글이 섞인 복잡한 수학 문제 이미지에서 모든 텍스트 정보를 완벽하게 추출하는 것입니다.
+
+        다음의 '단계적 분석' 과정을 반드시 내부적으로 수행하여 정확도를 극대화하세요:
+        1.  **[1단계: 영역 분할]** 이미지 전체를 훑어보고, '문제 서술부', '핵심 수식부(예: lim)', '기하 도형부', '단서 조항부'로 시각적 영역을 나눕니다.
+        2.  **[2단계: 개별 텍스트 추출]** 각 영역의 텍스트를 하나씩, 매우 신중하게 읽어냅니다. 특히 '기하 도형부' 안에 포함된 작은 글씨나 기호(예: f(θ), g(θ), R, U, T, θ, 2θ 등)를 절대 놓치지 마세요.
+        3.  **[3단계: 종합 및 정리]** 1, 2단계에서 추출한 모든 정보를 모아, 논리적인 순서에 따라 하나의 완전한 문제 텍스트로 재구성합니다.
+
+        최종 결과물은 3단계에서 완성된, 깨끗하게 정리된 텍스트만 보여주세요. 당신의 생각 과정(1, 2단계)은 출력하지 마세요.`;
+
         const base64Data = await fileToBase64(file);
         const requestBody = {
             "contents": [{
                 "parts": [
-                    { "text": "이 이미지에서 수학 문제와 관련된 텍스트만 정확하게 추출해줘. 다른 설명은 붙이지 마." },
+                    { "text": ocrPrompt },
                     { "inline_data": { "mime_type": file.type, "data": base64Data } }
                 ]
             }]
@@ -220,15 +230,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         return data.candidates[0].content.parts[0].text.trim();
     }
-    
+
     async function guidanceChef(newPromptText, history) {
-        // ==================== [수정된 부분] ====================
-        // 튜터링 역할: 복잡한 추론과 대화에 가장 강력한 Gemini 1.5 Pro를 사용합니다.
-        // 이를 통해 AI 튜터의 문제 해결 능력과 대화 품질을 극대화합니다.
-        const model = 'gemini-1.5-pro-latest';
-        // =======================================================
+        const model = 'gemini-2.5-flash-preview-04-17';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${API_KEY}`;
-        
+
         const newContents = [...history, { "role": "user", "parts": [{ "text": newPromptText }] }];
 
         const requestBody = {
@@ -244,18 +250,17 @@ window.addEventListener('DOMContentLoaded', () => {
             throw new Error(`HTTP 에러! 상태: ${response.status} - ${errorBody.error.message}`);
         }
         const data = await response.json();
-        
+
         if (!data.candidates || data.candidates.length === 0) {
             throw new Error('API로부터 유효한 응답을 받지 못했습니다. 입력 파일이나 설정을 확인해주세요.');
         }
         const aiResponsePart = data.candidates[0].content;
-        
+
         conversationHistory = [...newContents, aiResponsePart];
 
         return aiResponsePart.parts[0].text;
     }
 
-    // 파일을 Base64로 변환하는 유틸리티 함수
     function fileToBase64(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -264,6 +269,7 @@ window.addEventListener('DOMContentLoaded', () => {
             reader.onerror = error => reject(error);
         });
     }
+
 
     // --- 앱 시작! ---
     initialize();

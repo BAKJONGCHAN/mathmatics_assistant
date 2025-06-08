@@ -22,8 +22,18 @@ button:disabled { background-color: #ccc !important; cursor: not-allowed; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 #conversation-area { margin-top: 20px; }
 #chat-history { height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background-color: #f9f9f9; margin-bottom: 10px; }
-.chat-message { padding: 8px 12px; border-radius: 15px; margin-bottom: 8px; max-width: 80%; }
+.chat-message {
+    padding: 8px 12px;
+    border-radius: 15px;
+    margin-bottom: 8px;
+    max-width: 80%;
+    white-space: pre-wrap;
+}
 .ai-message { background-color: #e0eafc; text-align: left; align-self: flex-start; }
 .student-message { background-color: #dcf8c6; text-align: right; align-self: flex-end; margin-left: auto;}
+.system-message { background-color: #f0f0f0; color: #555; font-style: italic; font-size: 0.9em; max-width: 100%; text-align: center; margin-left: auto; margin-right: auto;}
 #student-input-area { display: flex; gap: 10px; }
 #student-question-input { flex-grow: 1; }
+.latex { /* LaTeX 수식 스타일 */
+    font-size: 1.2em;
+}
