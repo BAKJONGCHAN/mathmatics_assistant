@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- [수정] 스마트폰 화면에 맞게 페이지 크기를 조절하는 매우 중요한 태그 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수학 문제 풀이 도움 앱(고등학생용)</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>수학 문제 풀이 도움 앱 (고등학생용) 🚀</h1>
+            <p class="subtitle">made by 종찬 샘(청운중)</p>
+        </div>
+        <button id="home-btn">첫 화면으로</button>
+    </header>
+
+    <!-- 초기 로그인 화면 -->
+    <div id="login-screen">
+        <h2>사용자 유형을 선택하세요</h2>
+        <div class="button-group">
+            <button id="login-teacher-btn">교사용</button>
+            <button id="login-student-btn">학생용</button>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 (기본 숨김) -->
+    <main id="main-container" class="container hidden">
+        <!-- ==================== 교사 제어판 ==================== -->
+        <section id="teacher-panel" class="control-panel">
+            <h2>👨‍🏫 교사 제어판</h2>
+
+            <fieldset>
+                <legend>API 키 설정</legend>
+                <input type="password" id="api-key-input" placeholder="Google AI Studio API 키를 입력하세요">
+                <div class="button-group">
+                    <button id="save-api-key-btn">저장</button>
+                    <button id="delete-api-key-btn" class="danger">삭제</button>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>AI 지도 방향 (프롬프트)</legend>
+                <textarea id="teacher-prompt" rows="4" placeholder="예: 정답을 직접 알려주지 말고, 학생이 스스로 생각할 수 있도록 힌트만 주세요. 친절한 말투로 격려해주세요."></textarea>
+                <div class="button-group">
+                    <button id="save-prompt-btn">저장</button>
+                    <button id="delete-prompt-btn" class="danger">삭제</button>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>AI 창의성 (Temperature)</legend>
+                <label>0.0 (정해진 답변) <input type="range" id="temperature-slider" min="0" max="1" step="0.1" value="0.3"> 1.0 (창의적 답변)</label>
+                <span id="temperature-value">0.3</span>
+                <div class="button-group">
+                    <button id="save-temperature-btn">저장</button>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>모범 풀이 예시 파일 (선택)</legend>
+                <input type="file" id="teacher-example-uploader" accept="image/*,application/pdf">
+                <span id="example-file-name">선택된 파일 없음</span>
+                <div class="button-group">
+                    <button id="delete-example-btn" class="danger">삭제</button>
+                </div>
+            </fieldset>
+        </section>
+
+        <!-- ==================== 학생 학습 공간 ==================== -->
+        <section id="student-panel" class="control-panel">
+            <h2>👩‍🎓 학생 학습 공간</h2>
+            <p>도움이 필요한 문제 사진이나 PDF를 올려주세요!</p>
+            <input type="file" id="student-problem-uploader" accept="image/*,application/pdf">
+            <button id="start-solving-btn">도움 요청하기!</button>
+
+            <div id="loading-spinner" class="hidden">
+                <div class="spinner"></div>
+                <p>AI 튜터가 문제를 분석하고 있어요...</p>
+            </div>
+
+            <div id="conversation-area" class="hidden">
+                <h3>AI 튜터와의 대화</h3>
+                <div id="chat-history"></div>
+                <div id="student-input-area">
+                    <input type="text" id="student-question-input" placeholder="궁금한 점을 물어보거나 답변을 입력하세요">
+                    <button id="send-student-msg-btn">전송</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
